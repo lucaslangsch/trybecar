@@ -1,5 +1,5 @@
 const express = require('express');
-const camelize = require('camelize'); // para entender melhor esse pacote vocÊ pode dar uma olhadinha aqui: https://www.npmjs.com/package/camelize
+const camelize = require('camelize');
 const connection = require('./connection');
 
 const app = express();
@@ -7,9 +7,8 @@ const app = express();
 app.use(express.json());
 
 const WAITING_DRIVER = 1;
-const DRIVER_ON_THE_WAY = 2;
-const TRAVEL_IN_PROGRESS = 3;
-const TRAVEL_FINISHED = 4;
+const TRAVEL_STARTED = 2;
+const TRAVEL_FINISHED = 3;
 
 const passengerExists = async (passengerId) => {
   const [[passenger]] = await connection.execute(
@@ -39,9 +38,7 @@ app.post('/passengers/:passengerId/request/travel', async (req, res) => {
       `INSERT INTO travels 
           (passenger_id, starting_address, ending_address) VALUE (?, ?, ?)`,
       [
-        passengerId,
-        startingAddress,
-        endingAddress,
+        passengerId, startingAddress, endingAddress,
       ],
     );
     await Promise.all(saveWaypoints(waypoints, resultTravel.insertId));
@@ -70,20 +67,7 @@ app.put('/drivers/:driverId/travels/:travelId/assign', async (req, res) => {
   );
   await connection.execute(
     'UPDATE travels SET travel_status_id = ? WHERE id = ? AND driver_id = ?',
-    [DRIVER_ON_THE_WAY, travelId, driverId],
-  );
-  const [[result]] = await connection.execute(
-    'SELECT * FROM travels WHERE id = ?',
-    [travelId],
-  );
-  res.status(200).json(result);
-});
-
-app.put('/drivers/:driverId/travels/:travelId/start', async (req, res) => {
-  const { travelId, driverId } = req.params;
-  await connection.execute(
-    'UPDATE travels SET travel_status_id = ? WHERE id = ? AND driver_id = ?',
-    [TRAVEL_IN_PROGRESS, travelId, driverId],
+    [TRAVEL_STARTED, travelId, driverId],
   );
   const [[result]] = await connection.execute(
     'SELECT * FROM travels WHERE id = ?',
