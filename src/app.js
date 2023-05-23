@@ -10,12 +10,12 @@ const WAITING_DRIVER = 1;
 const DRIVER_ON_THE_WAY = 2;
 const TRAVEL_IN_PROGRESS = 3;
 const TRAVEL_FINISHED = 4;
-const statusArr = [
+/* const statusArr = [
   WAITING_DRIVER,
   DRIVER_ON_THE_WAY,
   TRAVEL_IN_PROGRESS,
   TRAVEL_FINISHED,
-];
+];*/
 
 const passengerExists = async (passengerId) => {
   const [[passenger]] = await connection.execute(
