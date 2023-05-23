@@ -6,17 +6,6 @@ const app = express();
 
 app.use(express.json());
 
-const WAITING_DRIVER = 1;
-const DRIVER_ON_THE_WAY = 2;
-const TRAVEL_IN_PROGRESS = 3;
-const TRAVEL_FINISHED = 4;
-/* const statusArr = [
-  WAITING_DRIVER,
-  DRIVER_ON_THE_WAY,
-  TRAVEL_IN_PROGRESS,
-  TRAVEL_FINISHED,
-];*/
-
 const passengerExists = async (passengerId) => {
   const [[passenger]] = await connection.execute(
     'SELECT * FROM passengers WHERE id = ?',
@@ -59,13 +48,15 @@ app.post('/passengers/:passengerId/request/travel', async (req, res) => {
 });
 
 app.get('/drivers/open/travels', async (_req, res) => {
+  const WAITING_DRIVER = 1;
+
   const [result] = await connection.execute(
     `SELECT TR.id, TR.passenger_id, TR.driver_id, TR.travel_status_id,
     TR.travel_status_id, TR.starting_address, TR.ending_address, TR.request_date,
       TS.status
     FROM travels AS TR
     INNER JOIN travel_status AS TS ON TR.travel_status_id = TS.id
-    WHERE TR.id = ?`
+    WHERE TR.id = ?;`
     [WAITING_DRIVER],
   );
   res.status(200).json(result);
@@ -80,14 +71,11 @@ app.put('/drivers/:driverId/travels/:travelId', async (req, res) => {
       TS.status
     FROM travels AS TR
     INNER JOIN travel_status AS TS ON TR.travel_status_id = TS.id
-    WHERE TR.id = ?`
+    WHERE TR.id = ?;`
     [travelId],
   );
 
   const nextTravelStatusId = travel_status_id + 1;
-  // REMOVER, isso será utilizado no dia de service
-  // const isValid = statusArr.includes(Number(nextTravelStatusId));
-  // if (!isValid) return res.status(409).end();
 
   await connection.execute(
     'UPDATE travels SET travel_status_id = ? WHERE id = ? AND driver_id = ?',
@@ -99,7 +87,7 @@ app.put('/drivers/:driverId/travels/:travelId', async (req, res) => {
       TS.status
     FROM travels AS TR
     INNER JOIN travel_status AS TS ON TR.travel_status_id = TS.id
-    WHERE TR.id = ?`,
+    WHERE TR.id = ?;`,
     [travelId],
   );
   res.status(200).json(result);
