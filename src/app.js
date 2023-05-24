@@ -31,19 +31,21 @@ app.post('/passengers/:passengerId/request/travel', async (req, res) => {
 
   if (await passengerExists(passengerId)) {
     const [resultTravel] = await connection.execute(
-      `INSERT INTO travels 
-          (passenger_id, starting_address, ending_address) VALUE (?, ?, ?)`,
-      [
-        passengerId, startingAddress, endingAddress,
-      ],
+      `INSERT INTO travels (passenger_id, starting_address, ending_address) 
+        VALUE (?, ?, ?);`,
+      [passengerId, startingAddress, endingAddress],
     );
+
     await Promise.all(saveWaypoints(waypoints, resultTravel.insertId));
+
     const [[response]] = await connection.execute(
       'SELECT * FROM travels WHERE id = ?',
       [resultTravel.insertId],
     );
+
     return res.status(201).json(camelize(response));
   }
+
   res.status(500).json({ message: 'Ocorreu um erro' });
 });
 
@@ -56,15 +58,16 @@ app.get('/drivers/open/travels', async (_req, res) => {
       TS.status
     FROM travels AS TR
     INNER JOIN travel_status AS TS ON TR.travel_status_id = TS.id
-    WHERE TR.id = ?;`
+    WHERE TR.id = ?;`,
     [WAITING_DRIVER],
   );
+
   res.status(200).json(result);
 });
 
-// aula ao vivo
 app.put('/drivers/:driverId/travels/:travelId', async (req, res) => {
   const { driverId, travelId } = req.params;
+
   const [[travel_status_id]] = await connection.execute(
     `SELECT TR.id, TR.passenger_id, TR.driver_id, TR.travel_status_id,
     TR.travel_status_id, TR.starting_address, TR.ending_address, TR.request_date,
@@ -81,6 +84,7 @@ app.put('/drivers/:driverId/travels/:travelId', async (req, res) => {
     'UPDATE travels SET travel_status_id = ? WHERE id = ? AND driver_id = ?',
     [nextTravelStatusId, travelId, driverId],
   );
+
   const [[result]] = await connection.execute(
     `SELECT TR.id, TR.passenger_id, TR.driver_id, TR.travel_status_id,
     TR.travel_status_id, TR.starting_address, TR.ending_address, TR.request_date,
