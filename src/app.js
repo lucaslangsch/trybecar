@@ -82,7 +82,7 @@ app.get('/drivers/open/travels', async (_req, res) => {
     [WAITING_DRIVER],
   );
 
-  res.status(200).json(result);
+  res.status(200).json(camelize(result));
 });
 
 app.put('/drivers/:driverId/travels/:travelId', async (req, res) => {
