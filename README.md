@@ -1,2 +1,3 @@
 # TrybeCar API
-readme inicio do dia 2
+
+<!-- ADICIONAR INFORMAÇÕES SOBRE A BRANCH `INITIAL-SETUP` -->
