@@ -11,8 +11,7 @@ const passengerExists = async (passengerId) => {
     'SELECT * FROM passengers WHERE id = ?',
     [passengerId],
   );
-  if (passenger) return true;
-  return false;
+  return passenger || false;
 };
 
 const saveWaypoints = (waypoints, travelId) => {
