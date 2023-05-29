@@ -1,6 +1,6 @@
 const express = require('express');
 const camelize = require('camelize');
-const connection = require('./connection');
+const connection = require('./models/connection');
 
 const app = express();
 
@@ -38,17 +38,18 @@ app.post('/passengers/:passengerId/request/travel', async (req, res) => {
 
     const [[response]] = await connection.execute(
       `SELECT
-        TRV.id,
-        TRV.driver_id,
-        TRV.starting_address,
-        TRV.ending_address,
-        TRV.request_date,
-        TRVS.status,
+        TR.id,
+        TR.driver_id,
+        TR.starting_address,
+        TR.ending_address,
+        TR.request_date,
+        TS.status,
         WP.address,
         WP.stop_order
-      FROM travels AS TRV
-      INNER JOIN travel_status AS TRVS ON TRV.travel_status_id = TRVS.id
-      LEFT JOIN waypoints AS WP ON WP.travel_id = TRV.id
+      FROM travels AS TR INNER JOIN travel_status AS TS 
+        ON TR.travel_status_id = TS.id
+      LEFT JOIN waypoints AS WP 
+        ON WP.travel_id = TR.id
       WHERE TR.id = ?;`,
       [resultTravel.insertId],
     );
@@ -62,17 +63,18 @@ app.get('/drivers/open/travels', async (_req, res) => {
 
   const [result] = await connection.execute(
     `SELECT
-      TRV.id,
-      TRV.driver_id,
-      TRV.starting_address,
-      TRV.ending_address,
-      TRV.request_date,
-      TRVS.status,
+      TR.id,
+      TR.driver_id,
+      TR.starting_address,
+      TR.ending_address,
+      TR.request_date,
+      TS.status,
       WP.address,
       WP.stop_order
-    FROM travels AS TRV
-    INNER JOIN travel_status AS TRVS ON TRV.travel_status_id = TRVS.id
-    LEFT JOIN waypoints AS WP ON WP.travel_id = TRV.id
+    FROM travels AS TR INNER JOIN travel_status AS TS 
+      ON TR.travel_status_id = TS.id
+    LEFT JOIN waypoints AS WP 
+      ON WP.travel_id = TR.id
     WHERE TR.travel_status_id = ?;`,
     [WAITING_DRIVER],
   );
@@ -85,17 +87,18 @@ app.put('/drivers/:driverId/travels/:travelId', async (req, res) => {
 
   const [[travel_status_id]] = await connection.execute(
     `SELECT
-      TRV.id,
-      TRV.driver_id,
-      TRV.starting_address,
-      TRV.ending_address,
-      TRV.request_date,
-      TRVS.status,
+      TR.id,
+      TR.driver_id,
+      TR.starting_address,
+      TR.ending_address,
+      TR.request_date,
+      TS.status,
       WP.address,
       WP.stop_order
-    FROM travels AS TRV
-    INNER JOIN travel_status AS TRVS ON TRV.travel_status_id = TRVS.id
-    LEFT JOIN waypoints AS WP ON WP.travel_id = TRV.id
+    FROM travels AS TR INNER JOIN travel_status AS TS 
+      ON TR.travel_status_id = TS.id
+    LEFT JOIN waypoints AS WP 
+      ON WP.travel_id = TR.id
     WHERE TR.id = ?;`
     [travelId],
   );
@@ -108,17 +111,18 @@ app.put('/drivers/:driverId/travels/:travelId', async (req, res) => {
 
   const [[result]] = await connection.execute(
     `SELECT
-      TRV.id,
-      TRV.driver_id,
-      TRV.starting_address,
-      TRV.ending_address,
-      TRV.request_date,
-      TRVS.status,
+      TR.id,
+      TR.driver_id,
+      TR.starting_address,
+      TR.ending_address,
+      TR.request_date,
+      TS.status,
       WP.address,
       WP.stop_order
-    FROM travels AS TRV
-    INNER JOIN travel_status AS TRVS ON TRV.travel_status_id = TRVS.id
-    LEFT JOIN waypoints AS WP ON WP.travel_id = TRV.id
+    FROM travels AS TR INNER JOIN travel_status AS TS 
+      ON TR.travel_status_id = TS.id
+    LEFT JOIN waypoints AS WP 
+      ON WP.travel_id = TR.id
     WHERE TR.id = ?;`,
     [travelId],
   );
