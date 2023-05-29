@@ -24,92 +24,93 @@ const saveWaypoints = (waypoints, travelId) => {
   return [];
 };
 
+const groupWaypoints = (travels) => {
+  const waypoints = travels.reduce((accumulator, { address, stopOrder }) => {
+    if (address && stopOrder) { accumulator.push({ address, stopOrder }); }
+    return accumulator;
+  }, []);
+  
+  const [{ id, driverId, status, requestDate, startingAddress, endingAddress }] = travels;
+  const travel = { id, driverId, status, requestDate, startingAddress, endingAddress, waypoints };
+
+  return travel;
+};
+
 app.post('/passengers/:passengerId/request/travel', async (req, res) => {
   const { passengerId } = req.params;
   const { startingAddress, endingAddress, waypoints } = req.body;
 
-  if (await passengerExists(passengerId)) {
-    const [resultTravel] = await connection.execute(
-      'INSERT INTO travels (passenger_id, starting_address, ending_address) VALUE (?, ?, ?);',
-      [passengerId, startingAddress, endingAddress],
-    );
+  const passenger = await passengerExists(passengerId);
+  if (!passenger) return res.status(404).json({ message: 'Passenger not found' });
 
-    await Promise.all(saveWaypoints(waypoints, resultTravel.insertId));
+  const [{ insertId }] = await connection.execute(
+    'INSERT INTO travels (passenger_id, starting_address, ending_address) VALUE (?, ?, ?);',
+    [passengerId, startingAddress, endingAddress],
+  );
 
-    const [[response]] = await connection.execute(
-      `SELECT
-        TR.id,
-        TR.driver_id,
-        TR.starting_address,
-        TR.ending_address,
-        TR.request_date,
-        TS.status,
-        WP.address,
-        WP.stop_order
-      FROM travels AS TR INNER JOIN travel_status AS TS 
-        ON TR.travel_status_id = TS.id
-      LEFT JOIN waypoints AS WP 
-        ON WP.travel_id = TR.id
-      WHERE TR.id = ?;`,
-      [resultTravel.insertId],
-    );
-    return res.status(201).json(camelize(response));
-  }
-  res.status(500).json({ message: 'Ocorreu um erro' });
+  await Promise.all(saveWaypoints(waypoints, insertId));
+
+  const [travelsFromDB] = await connection.execute(
+    `SELECT
+      TR.id,
+      TR.driver_id,
+      TR.starting_address,
+      TR.ending_address,
+      TR.request_date,
+      TS.status,
+      WP.address,
+      WP.stop_order
+    FROM travels AS TR INNER JOIN travel_status AS TS 
+      ON TR.travel_status_id = TS.id
+    LEFT JOIN waypoints AS WP 
+      ON WP.travel_id = TR.id
+    WHERE TR.id = ?;`,
+    [insertId],
+  );
+
+  const travelWithWaypoints = groupWaypoints(camelize(travelsFromDB));
+
+  return res.status(201).json(travelWithWaypoints);
 });
 
 app.get('/drivers/open/travels', async (_req, res) => {
   const WAITING_DRIVER = 1;
 
-  const [result] = await connection.execute(
+  const [openTravelsFromDB] = await connection.execute(
     `SELECT
       TR.id,
       TR.driver_id,
       TR.starting_address,
       TR.ending_address,
       TR.request_date,
-      TS.status,
-      WP.address,
-      WP.stop_order
-    FROM travels AS TR INNER JOIN travel_status AS TS 
-      ON TR.travel_status_id = TS.id
-    LEFT JOIN waypoints AS WP 
+      COUNT(WP.stop_order) AS amount_stop
+    FROM travels AS TR LEFT JOIN waypoints AS WP 
       ON WP.travel_id = TR.id
-    WHERE TR.travel_status_id = ?;`,
+    WHERE TR.travel_status_id = ?
+    GROUP BY TR.id;`,
     [WAITING_DRIVER],
   );
 
-  res.status(200).json(camelize(result));
+  res.status(200).json(camelize(openTravelsFromDB));
 });
 
-app.put('/drivers/:driverId/travels/:travelId', async (req, res) => {
+app.patch('/drivers/:driverId/travels/:travelId', async (req, res) => {
   const { driverId, travelId } = req.params;
+  const INCREMENT_STATUS = 1;
 
-  const [[travel_status_id]] = await connection.execute(
-    `SELECT
-      TR.id,
-      TR.driver_id,
-      TR.starting_address,
-      TR.ending_address,
-      TR.request_date,
-      TS.status,
-      WP.address,
-      WP.stop_order
-    FROM travels AS TR INNER JOIN travel_status AS TS 
-      ON TR.travel_status_id = TS.id
-    LEFT JOIN waypoints AS WP 
-      ON WP.travel_id = TR.id
-    WHERE TR.id = ?;`
+  const [[{ travelStatusId }]] = await connection.execute(
+    `SELECT travel_status_id AS travelStatusId FROM travels WHERE id = ?;`,
     [travelId],
   );
 
-  const nextTravelStatusId = travel_status_id + 1;
+  const nextTravelStatusId = travelStatusId + INCREMENT_STATUS;
+
   await connection.execute(
-    'UPDATE travels SET travel_status_id = ? WHERE id = ? AND driver_id = ?',
-    [nextTravelStatusId, travelId, driverId],
+    'UPDATE travels SET travel_status_id = ?, driver_id = ? WHERE id = ?',
+    [nextTravelStatusId, driverId, travelId ],
   );
 
-  const [[result]] = await connection.execute(
+  const [travelsFromDB] = await connection.execute(
     `SELECT
       TR.id,
       TR.driver_id,
@@ -127,7 +128,9 @@ app.put('/drivers/:driverId/travels/:travelId', async (req, res) => {
     [travelId],
   );
 
-  res.status(200).json(result);
+  const travelWithWaypointsUpdated = groupWaypoints(camelize(travelsFromDB));
+
+  res.status(200).json(travelWithWaypointsUpdated);
 });
 
 module.exports = app;
