@@ -41,18 +41,21 @@ app.post('/passengers/:passengerId/request/travel', async (req, res) => {
     await Promise.all(saveWaypoints(waypoints, resultTravel.insertId));
 
     const [[response]] = await connection.execute(
-      `SELECT 
+      `SELECT
         TR.id,
         TR.passenger_id,
         TR.driver_id,
         TR.travel_status_id,
-        TR.travel_status_id,
         TR.starting_address,
         TR.ending_address,
         TR.request_date,
-        TS.status
+        TS.status,
+        WP.address,
+        WP.stop_order
       FROM travels AS TR INNER JOIN travel_status AS TS 
         ON TR.travel_status_id = TS.id
+      LEFT JOIN waypoints AS WP 
+        ON WP.travel_id = TR.id
       WHERE TR.id = ?;`,
       [resultTravel.insertId],
     );
@@ -67,18 +70,22 @@ app.get('/drivers/open/travels', async (_req, res) => {
   const WAITING_DRIVER = 1;
 
   const [result] = await connection.execute(
-    `SELECT TR.id,
+    `SELECT
+      TR.id,
       TR.passenger_id,
       TR.driver_id,
-      TR.travel_status_id,
       TR.travel_status_id,
       TR.starting_address,
       TR.ending_address,
       TR.request_date,
-      TS.status
+      TS.status,
+      WP.address,
+      WP.stop_order
     FROM travels AS TR INNER JOIN travel_status AS TS 
       ON TR.travel_status_id = TS.id
-    WHERE TR.id = ?;`,
+    LEFT JOIN waypoints AS WP 
+      ON WP.travel_id = TR.id
+    WHERE TR.travel_status_id = ?;`,
     [WAITING_DRIVER],
   );
 
@@ -89,17 +96,21 @@ app.put('/drivers/:driverId/travels/:travelId', async (req, res) => {
   const { driverId, travelId } = req.params;
 
   const [[travel_status_id]] = await connection.execute(
-    `SELECT TR.id,
+    `SELECT
+      TR.id,
       TR.passenger_id,
       TR.driver_id,
-      TR.travel_status_id,
       TR.travel_status_id,
       TR.starting_address,
       TR.ending_address,
       TR.request_date,
-      TS.status
+      TS.status,
+      WP.address,
+      WP.stop_order
     FROM travels AS TR INNER JOIN travel_status AS TS 
       ON TR.travel_status_id = TS.id
+    LEFT JOIN waypoints AS WP 
+      ON WP.travel_id = TR.id
     WHERE TR.id = ?;`
     [travelId],
   );
@@ -112,17 +123,21 @@ app.put('/drivers/:driverId/travels/:travelId', async (req, res) => {
   );
 
   const [[result]] = await connection.execute(
-    `SELECT TR.id,
+    `SELECT
+      TR.id,
       TR.passenger_id,
       TR.driver_id,
-      TR.travel_status_id,
       TR.travel_status_id,
       TR.starting_address,
       TR.ending_address,
       TR.request_date,
-      TS.status
+      TS.status,
+      WP.address,
+      WP.stop_order
     FROM travels AS TR INNER JOIN travel_status AS TS 
       ON TR.travel_status_id = TS.id
+    LEFT JOIN waypoints AS WP 
+      ON WP.travel_id = TR.id
     WHERE TR.id = ?;`,
     [travelId],
   );
