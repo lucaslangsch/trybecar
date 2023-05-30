@@ -30,8 +30,8 @@ const groupWaypoints = (travels) => {
     return accumulator;
   }, []);
   
-  const [{ id, driverId, status, requestDate, startingAddress, endingAddress }] = travels;
-  const travel = { id, driverId, status, requestDate, startingAddress, endingAddress, waypoints };
+  const [{ address, stopOrder, ...travelFields }] = travels;
+  const travel = { ...travelFields, waypoints };
 
   return travel;
 };
@@ -57,7 +57,7 @@ app.post('/passengers/:passengerId/request/travel', async (req, res) => {
       TR.starting_address,
       TR.ending_address,
       TR.request_date,
-      TR.travel_status_id
+      TR.travel_status_id,
       TS.status,
       WP.address,
       WP.stop_order
@@ -118,7 +118,7 @@ app.patch('/drivers/:driverId/travels/:travelId', async (req, res) => {
       TR.starting_address,
       TR.ending_address,
       TR.request_date,
-      TR.travel_status_id
+      TR.travel_status_id,
       TS.status,
       WP.address,
       WP.stop_order
