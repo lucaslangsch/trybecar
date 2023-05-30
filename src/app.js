@@ -77,7 +77,7 @@ app.post('/passengers/:passengerId/request/travel', async (req, res) => {
 app.get('/drivers/open/travels', async (_req, res) => {
   const WAITING_DRIVER = 1;
 
-  const [openTravelsFromDB] = await connection.execute(
+  const [travelsFromDB] = await connection.execute(
     `SELECT
       TR.id,
       TR.driver_id,
@@ -92,7 +92,7 @@ app.get('/drivers/open/travels', async (_req, res) => {
     [WAITING_DRIVER],
   );
 
-  res.status(200).json(camelize(openTravelsFromDB));
+  res.status(200).json(camelize(travelsFromDB));
 });
 
 app.patch('/drivers/:driverId/travels/:travelId', async (req, res) => {
