@@ -99,7 +99,7 @@ app.patch('/drivers/:driverId/travels/:travelId', async (req, res) => {
   const INCREMENT_STATUS = 1;
 
   const [[{ travelStatusId }]] = await connection.execute(
-    `SELECT travel_status_id AS travelStatusId FROM travels WHERE id = ?;`,
+    'SELECT travel_status_id AS travelStatusId FROM travels WHERE id = ?;',
     [travelId],
   );
 
