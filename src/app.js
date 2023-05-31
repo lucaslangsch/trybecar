@@ -14,25 +14,26 @@ const passengerExists = async (passengerId) => {
   return passenger || false;
 };
 
-const saveWaypoints = (waypoints, travelId) => {
+const saveWaypoints = async (waypoints, travelId) => {
+  let insertPromises = [];
+
   if (waypoints && waypoints.length > 0) {
-    return waypoints.map(async (value) => connection.execute(
+    insertPromises = waypoints.map(({ address, stopOrder }) => connection.execute(
       'INSERT INTO waypoints (address, stop_order, travel_id) VALUE (?, ?, ?)',
-      [value.address, value.stopOrder, travelId],
+      [address, stopOrder, travelId],
     ));
+    await Promise.all(insertPromises);
   }
-  return [];
 };
 
 const groupWaypoints = (travels) => {
-  const waypoints = travels.reduce((accumulator, { address, stopOrder }) => {
-    if (address && stopOrder) { accumulator.push({ address, stopOrder }); }
-    return accumulator;
-  }, []);
+  const waypoints = [];
+  travels.forEach(({ address, stopOrder }) => {
+    if (address && stopOrder) waypoints.push({ address, stopOrder });
+  });
   
   const [{ address, stopOrder, ...travelFields }] = travels;
   const travel = { ...travelFields, waypoints };
-
   return travel;
 };
 
@@ -48,7 +49,7 @@ app.post('/passengers/:passengerId/request/travel', async (req, res) => {
     [passengerId, startingAddress, endingAddress],
   );
 
-  await Promise.all(saveWaypoints(waypoints, insertId));
+  await saveWaypoints(waypoints, insertId);
 
   const [travelsFromDB] = await connection.execute(
     `SELECT
@@ -108,7 +109,7 @@ app.patch('/drivers/:driverId/travels/:travelId', async (req, res) => {
 
   await connection.execute(
     'UPDATE travels SET travel_status_id = ?, driver_id = ? WHERE id = ?',
-    [nextTravelStatusId, driverId, travelId ],
+    [nextTravelStatusId, driverId, travelId],
   );
 
   const [travelsFromDB] = await connection.execute(
