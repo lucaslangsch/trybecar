@@ -1,6 +1,5 @@
 node_modules
 coverage
 .nyc*
-tests/unit/models/mocks/**
-tests/unit/services/mocks/**
-tests/unit/controllers/mocks/**
+tests/unit/mocks/**
+tests/integration/mocks/**
