@@ -1,5 +1,7 @@
 # TrybeCar API
 
+#### ALTERAR ANTES DO MERGE !!!
+<!-- 
 Uma API para gerenciamento de corridas, pessoas motoristas e passageiras.
 
 Essa API é usada como exemplo didático para o bloco de Arquitetura de Software do Curso de Desenvolvimento Web da Trybe.
@@ -73,4 +75,4 @@ npm run debug
   - POST `/drivers`
   - POST `/cars`
 
-Os endpoints são apresentados com mais detalhes no conteúdo e exercícios.
+Os endpoints são apresentados com mais detalhes no conteúdo e exercícios. -->
