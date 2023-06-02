@@ -100,8 +100,22 @@ app.patch('/drivers/:driverId/travels/:travelId', async (req, res) => {
   const { driverId, travelId } = req.params;
   const INCREMENT_STATUS = 1;
 
-  const [[{ travelStatusId }]] = await connection.execute(
-    'SELECT travel_status_id AS travelStatusId FROM travels WHERE id = ?;',
+  const [[{ travel_status_id: travelStatusId }]] = await connection.execute(
+    `SELECT
+      TR.id,
+      TR.driver_id,
+      TR.starting_address,
+      TR.ending_address,
+      TR.request_date,
+      TR.travel_status_id,
+      TS.status,
+      WP.address,
+      WP.stop_order
+    FROM travels AS TR INNER JOIN travel_status AS TS 
+      ON TR.travel_status_id = TS.id
+    LEFT JOIN waypoints AS WP 
+      ON WP.travel_id = TR.id
+    WHERE TR.id = ?;`,
     [travelId],
   );
 
