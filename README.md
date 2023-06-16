@@ -1,7 +1,5 @@
 # TrybeCar API
 
-#### ALTERAR ANTES DO MERGE !!!
-<!-- 
 Uma API para gerenciamento de corridas, pessoas motoristas e passageiras.
 
 Essa API é usada como exemplo didático para o bloco de Arquitetura de Software do Curso de Desenvolvimento Web da Trybe.
@@ -9,18 +7,46 @@ Essa API é usada como exemplo didático para o bloco de Arquitetura de Software
 <details>
   <summary>Branchs no repositório</summary>
 
-  1. `complex-application` - início do bloco
-  2. `simple-application-model-course` - conteúdo do dia de model completo
-  3. `simple-application-model-live-lectures` - aula ao vivo do dia de model completo
-  4. `simple-application-service-course` - conteúdo do dia de service completo
-  5. `simple-application-service-live-lectures` - aula ao vivo do dia de service completo
-  6. `simple-application-controller-course` - conteúdo do dia de controller completo
-  7. `simple-application-controller-live-lectures` - aula ao vivo do dia de controller completo
+  Cada dia de conteúdo possui 3 _branches_ no seguinte padrão:
+  - **n-begin**: Versão do projeto que é o ponto de partida do conteúdo do dia.
+  - **n-content**: Versão do projeto que inclui tudo que foi implementado no conteúdo e é o ponto de partida para aula ao vivo.
+  - **n-live-lecture**: Versão do projeto que inclui tudo que foi implementado no conteúdo e a aula ao vivo e é o ponto de partida para o exercício do dia.
+
+ Logo temos no total as <número> branches:   
+
+  ### Dia 1 
+  1. `1-begin` - versão do início do conteúdo.
+  2. `1-content` - versão com o que foi implementado no conteúdo.
+  3. `1-live-lecture` - versão com o que foi implementado na aula.
+
+  ### Dia 2
+  
+  1. `2-begin` - versão do início do conteúdo.
+  2. `2-content` - versão com o que foi implementado no conteúdo.
+  3. `2-live-lecture` - versão com o que foi implementado na aula.
+
+  ### Dia 3
+  
+  1. `3-begin` - versão do início do conteúdo.
+  2. `3-content` - versão com o que foi implementado no conteúdo.
+  3. `3-live-lecture` - versão com o que foi implementado na aula.
+     
+  ### Dia 4
+  
+  1. `4-begin` - versão do início do conteúdo.
+  2. `4-content` - versão com o que foi implementado no conteúdo.
+  3. `4-live-lecture` - versão com o que foi implementado na aula.
+
+  ### Dia 5   
+
+  1. `5-begin` - versão do início do conteúdo.
+  2. `5-content` - versão com o que foi implementado no conteúdo.
+  3. `5-live-lecture` - versão com o que foi implementado na aula.
 </details>
 
 ## Rodando a aplicação inicial via Docker
 
-- Clone o repositório e acesse a branch `complex-application` do projeto
+- Clone o repositório e acesse a branch respectiva do dia.
 
 ```bash
 git clone git@github.com:tryber/msc-architecture-trybecar.git
@@ -75,4 +101,4 @@ npm run debug
   - POST `/drivers`
   - POST `/cars`
 
-Os endpoints são apresentados com mais detalhes no conteúdo e exercícios. -->
+Os endpoints são apresentados com mais detalhes no conteúdo e exercícios.
