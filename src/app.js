@@ -17,4 +17,24 @@ app.get('/passengers/:id', async (req, res) => {
   return res.status(200).json(passenger);
 });
 
+app.post('/passengers', async (req, res) => {
+  const {name, email, phone} = req.body;
+  const passengerId = await passengerModel.insert({ name, email, phone });
+  const newPassenger = {
+    id: passengerId,
+    name,
+    email,
+    phone,
+  };
+  return res.status(200).json(newPassenger);
+});
+
+app.put('/passengers/:id', async (req, res) => {
+  const {name, email, phone} = req.body;
+  const { id } = req.params;
+  await passengerModel.update(id, { name, email, phone });
+  const updated = await passengerModel.findById(id);
+  return res.status(200).json(updated);
+})
+
 module.exports = app;
