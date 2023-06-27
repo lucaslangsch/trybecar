@@ -1,7 +1,7 @@
 const express = require('express');
 const camelize = require('camelize');
 const connection = require('./models/connection');
-const { passengerModel, travelModel } = require('./models');
+const { passengerModel, travelModel, driverModel } = require('./models');
 
 const app = express();
 
@@ -35,6 +35,12 @@ app.post('/passengers/:passengerId/request/travel', async (req, res) => {
   const newTravel = await travelModel.findById(travelId);
 
   return res.status(201).json(newTravel);
+});
+
+app.get('/drivers', async (req, res) => {
+  const passengers = await driverModel.findAll();
+  if (!passengers) return res.status(404).json({ message: 'Passengers not found' });
+  return res.status(201).json(passengers);
 });
 
 app.get('/drivers/open/travels', async (_req, res) => {
